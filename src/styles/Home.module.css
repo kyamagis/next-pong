@@ -1,0 +1,26 @@
+
+.title {
+  text-align: center;
+}
+
+.background {
+  background-color: black;
+  width: '480px';
+  height: '320px';
+}
+
+.ball {
+  fill:  white;
+}
+
+.centerline {
+  stroke: white;
+  stroke-width: 5;
+  stroke-dasharray: 5 5; 
+}
+
+.score {
+  fill: white;
+  font-size: 24px;
+  stroke-width: 5;
+}
