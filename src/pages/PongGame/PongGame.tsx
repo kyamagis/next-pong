@@ -1,8 +1,14 @@
 
 import styles from '@/styles/Home.module.css'
 
-import {BG_WIDTH, BG_HEIGHT, VIEWBOX, BALL_DIAMETER } from './constant'
-import {PADDLE_HEIGHT, PADDLE_WIDTH, RIGHT_PADDLE_X_POS } from './constant'
+import { 
+		BG_WIDTH, 
+		BG_HEIGHT, 
+		VIEWBOX, 
+		BALL_DIAMETER 
+} from './constant'
+
+import { PADDLE_HEIGHT, PADDLE_WIDTH, RIGHT_PADDLE_X_POS } from './constant'
 
 import usePongGame from '@/hooks/usePongGame'
 
@@ -39,9 +45,10 @@ export default PongGame;
 
 // いくつかのオプションを考えなければならない.
 
+// ボールの速度を変えられる.
+// マッチポイントの設定がきる．
+
 // パドルをy軸だけでなくx軸にも動かせる.
-// ボールの速度を返られる.
-// マッチポイントの設定．
-// ボールの弾道予測
+// ボールの弾道予測を画面に表示. 
 // あるキーを押している間にボールがパドルに接触したら, ボールをグラップしそのキーを離したらボールが相手側に飛んで行く
 // 画面の下側に重力を発生させボールの弾道を常に放物線にする.

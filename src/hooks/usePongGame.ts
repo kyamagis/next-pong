@@ -18,43 +18,47 @@ const usePongGame = () => {
 	const [rightScore, setRightScore] = useState(0);
 	const [leftScore, setLeftScore] = useState(0);
 
-	const [upPressedRightPaddle, setUpPressedRightPaddle] = useState(false);
-	const [downPressedRightpaddle, setDownPressedRightPaddle] = useState(false);
+	// loal変数で保持できるか. useRefでできるか.
+	const [upPressedLeftPaddle, setUpPressedLeftPaddle] = useState(false);
+	const [downPressedLeftPaddle, setDownPressedLeftPaddle] = useState(false);
+
+	// paddle = { pos, key }; useState, useRefのハイブリッドで作れるか？
+	// 押したキーをフレームまたぐまで保持するようにする.
 
 	const keyUpHandler = (e: KeyboardEvent) => {
 		if(e.key == "Up" || e.key == "ArrowUp") {
-			setUpPressedRightPaddle((prevUpPressedRightPaddle) => false);
+			setUpPressedLeftPaddle((prevUpPressedLeftPaddle) => false);
 		}
 		else if(e.key == "Down" || e.key == "ArrowDown") {
-			setDownPressedRightPaddle((prevdownPressedRightpaddle) => false);
+			setDownPressedLeftPaddle((prevdownPressedLefttPaddle) => false);
 		}
 	}
 
 	const keyDownHandler = (e: KeyboardEvent): void => {
 		if(e.key == "Up" || e.key == "ArrowUp") {
-			setUpPressedRightPaddle((prevUpPressedRightPaddle) => true);
+			setUpPressedLeftPaddle((prevUpPressedLeftPaddle) => true);
 		}
 		else if(e.key == "Down" || e.key == "ArrowDown") {
-			setDownPressedRightPaddle((prevdownPressedRightpaddle) => true);
+			setDownPressedLeftPaddle((prevdownPressedLefttPaddle) => true);
 		}
 	};
-	
+
 	useEffect(() => {
-		const interval = setInterval(calcPong, 10);
+		const interval = setInterval(calcPong, 1000); // 10 ms
 
 		// dev だと useEffctは二回呼ばれる
 		// build だと一回呼ばれる
-		console.log("setInterval " + interval);
+
 		document.addEventListener('keydown', keyDownHandler, false);
 		document.addEventListener('keyup', keyUpHandler, false);
 
 		return () => {
 			document.removeEventListener('keydown', keyDownHandler);
 			document.removeEventListener('keyup', keyUpHandler);
-			console.log("clearInterval " + interval);
+
 			clearInterval(interval);
 		};
-	}, [ball.x])
+	}, [ball.x]);
 
 	const calcBallBehavior = () => {
 		setBall((prevBall: Ball) => {
@@ -107,13 +111,13 @@ const usePongGame = () => {
 	}
 
 	const calcLeftPaddlePos = () => {
-		if(upPressedRightPaddle) {
+		if(upPressedLeftPaddle) {
 			setLeftPaddlePos((prevLeftPaddlePos) => (prevLeftPaddlePos - PADDLE_SPEED));
 			if (leftPaddlePos <= 0){
 				setLeftPaddlePos((prevLeftPaddlePos) => 0);
 			}
 		}
-		else if(downPressedRightpaddle) {
+		else if(downPressedLeftPaddle) {
 			setLeftPaddlePos((prevLeftPaddlePos) => (prevLeftPaddlePos + PADDLE_SPEED));
 			if (BG_HEIGHT <= leftPaddlePos + PADDLE_HEIGHT) {
 				setLeftPaddlePos((prevLeftPaddlePos) => (BG_HEIGHT - PADDLE_HEIGHT));
