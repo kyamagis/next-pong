@@ -27,7 +27,7 @@ const PongGame: React.FC = () => {
 				className={styles.background}
 			>
 			<line x1={BG_WIDTH / 2} y1={0} x2={BG_WIDTH / 2} y2={BG_HEIGHT} className={styles.centerline}/>
-			<rect width={BALL_DIAMETER} height={BALL_DIAMETER} x={ball.x} y={ball.y} className={styles.ball}/>
+			<rect width={BALL_DIAMETER} height={BALL_DIAMETER} x={ball.current.x} y={ball.current.y} className={styles.ball}/>
 			<rect width={PADDLE_WIDTH} height={PADDLE_HEIGHT} x={0} y={leftPlayerRef.current.paddlePos} className={styles.ball}/>
 			<rect width={PADDLE_WIDTH} height={PADDLE_HEIGHT} x={RIGHT_PADDLE_X_POS} y={rightPlayerRef.current.paddlePos} className={styles.ball}/>
 			<text id="text" x={BG_WIDTH / 2 -70 - 24} y={70} className={styles.score}>

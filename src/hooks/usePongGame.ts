@@ -21,7 +21,9 @@ const initPlayerRef = () => {
 
 const usePongGame = () => {
 
-	const [ball, setBall] = useState<Ball>(servBall());
+	// const [ball, setBall] = useState<Ball>(servBall());
+	const [lendaring, setLendaring] = useState(false);
+	const ball = useRef<Ball>(servBall());
 	const isKeyDown = useRef(Direction.Neutral);
 	const leftPlayerRef = useRef<Player>(initPlayerRef());
 	const rightPlayerRef = useRef<Player>(initPlayerRef());
@@ -51,10 +53,7 @@ const usePongGame = () => {
 	useEffect(() => {
 		document.addEventListener('keydown', keyDownHandler, false);
 		document.addEventListener('keyup', keyUpHandler, false);
-		const interval = setInterval(calcPong, 2000); // 10 ms
-
-		// dev だと useEffctは二回呼ばれる
-		// build だと一回呼ばれる
+		const interval = setInterval(calcPong, 10); // 10 ms
 
 		return () => {
 			document.removeEventListener('keydown', keyDownHandler);
@@ -62,39 +61,37 @@ const usePongGame = () => {
 
 			clearInterval(interval);
 		};
-	}, [ball.x]);
+	}, [lendaring]);
 
 	const calcBallBehavior = () => {
-		setBall((prevBall: Ball) => {
-			const newXPos = prevBall.x + prevBall.vx;
-			const newYPos = prevBall.y + prevBall.vy;
+		const newXPos = ball.current.x + ball.current.vx;
+		const newYPos = ball.current.y + ball.current.vy;
 
-			// console.log(newXPos);
-			// newXposが２回同時に同じ値を表示
-			// setBall関数が同時に２回呼ばれている．
-			if (newXPos < 0) { // ボールが左端に来たとき
-				return calcCollisionWallOrPaddle(newYPos, prevBall, leftPlayerRef, rightPlayerRef);
-			}
-			else if (BG_WIDTH < newXPos + BALL_DIAMETER) { // ボールが右端に来たとき
-				return calcCollisionWallOrPaddle(newYPos, prevBall, rightPlayerRef, leftPlayerRef);
-			}
-			if (newYPos <= 0 || BG_HEIGHT - BALL_DIAMETER <= newYPos) { // ボールが上下の壁に接触したとき
-				return { ...prevBall, vy: -prevBall.vy };
-			}
-			return { ...prevBall, x: newXPos, y: newYPos };
-		});
+		if (newXPos < 0) { // ボールが左端に来たとき
+			ball.current = calcCollisionWallOrPaddle(newYPos, ball, leftPlayerRef, rightPlayerRef);
+		}
+		else if (BG_WIDTH < newXPos + BALL_DIAMETER) { // ボールが右端に来たとき
+			ball.current = calcCollisionWallOrPaddle(newYPos, ball, rightPlayerRef, leftPlayerRef);
+		}
+		else if (newYPos <= 0 || BG_HEIGHT - BALL_DIAMETER <= newYPos) { // ボールが上下の壁に接触したとき
+			ball.current.vy *= -1;
+		}
+		else {
+			ball.current.x = newXPos;
+			ball.current.y = newYPos;
+		}
 	}
 
 	const calcCpuRightPlayerPos = () => {
-		if (0 < ball.vx && BG_WIDTH / 2 < ball.x) {
-			if (ball.y < rightPlayerRef.current.paddlePos) {
+		if (0 < ball.current.vx && BG_WIDTH / 2 < ball.current.x) {
+			if (ball.current.y < rightPlayerRef.current.paddlePos) {
 				rightPlayerRef.current.paddlePos -= CPU_SPEED;
 			}
-			else if (rightPlayerRef.current.paddlePos + PADDLE_HEIGHT < ball.y + BALL_DIAMETER) {
+			else if (rightPlayerRef.current.paddlePos + PADDLE_HEIGHT < ball.current.y + BALL_DIAMETER) {
 				rightPlayerRef.current.paddlePos += CPU_SPEED;
 			}
 		}
-		else if (ball.vx < 0) {
+		else if (ball.current.vx < 0) {
 			if (rightPlayerRef.current.paddlePos + (PADDLE_HEIGHT / 2) < BG_HEIGHT / 2) {
 				rightPlayerRef.current.paddlePos += 1;
 			}
@@ -115,7 +112,6 @@ const usePongGame = () => {
 			else {
 				leftPlayerRef.current.paddlePos = newLeftPaddlePos;
 			}
-			
 		}
 		else if(leftPlayerRef.current.paddleDir === Direction.Down) {
 			const newLeftPaddlePos = leftPlayerRef.current.paddlePos + PADDLE_SPEED;
@@ -136,6 +132,10 @@ const usePongGame = () => {
 		calcBallBehavior();
 		calcCpuRightPlayerPos();
 		calcLeftPaddlePos();
+		if (lendaring)
+			setLendaring(false);
+		else
+			setLendaring(true);
 	};
 
 	return { ball, leftPlayerRef, rightPlayerRef};
