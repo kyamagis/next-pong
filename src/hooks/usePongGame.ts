@@ -22,35 +22,39 @@ const initPlayerRef = () => {
 const usePongGame = () => {
 
 	const [ball, setBall] = useState<Ball>(servBall());
+	const isKeyDown = useRef(Direction.Neutral);
 	const leftPlayerRef = useRef<Player>(initPlayerRef());
 	const rightPlayerRef = useRef<Player>(initPlayerRef());
 
 	const keyUpHandler = (e: KeyboardEvent) => {
 		if(e.key === "Up" || e.key === "ArrowUp") {
-			leftPlayerRef.current.paddleDir = Direction.Neutral;
+			isKeyDown.current = Direction.Neutral;
+			// leftPlayerRef.current.paddleDir = Direction.Neutral;
 		}
 		else if(e.key === "Down" || e.key === "ArrowDown") {
-			leftPlayerRef.current.paddleDir = Direction.Neutral;
+			isKeyDown.current = Direction.Neutral;
+			// leftPlayerRef.current.paddleDir = Direction.Neutral;
 		}
 	}
 
 	const keyDownHandler = (e: KeyboardEvent): void => {
 		if(e.key === "Up" || e.key === "ArrowUp") {
+			isKeyDown.current = Direction.Up;
 			leftPlayerRef.current.paddleDir = Direction.Up;
 		}
 		else if(e.key === "Down" || e.key === "ArrowDown") {
+			isKeyDown.current = Direction.Down;
 			leftPlayerRef.current.paddleDir = Direction.Down;
 		}
 	};
 
 	useEffect(() => {
-		const interval = setInterval(calcPong, 10); // 10 ms
+		document.addEventListener('keydown', keyDownHandler, false);
+		document.addEventListener('keyup', keyUpHandler, false);
+		const interval = setInterval(calcPong, 2000); // 10 ms
 
 		// dev だと useEffctは二回呼ばれる
 		// build だと一回呼ばれる
-
-		document.addEventListener('keydown', keyDownHandler, false);
-		document.addEventListener('keyup', keyUpHandler, false);
 
 		return () => {
 			document.removeEventListener('keydown', keyDownHandler);
@@ -111,6 +115,7 @@ const usePongGame = () => {
 			else {
 				leftPlayerRef.current.paddlePos = newLeftPaddlePos;
 			}
+			
 		}
 		else if(leftPlayerRef.current.paddleDir === Direction.Down) {
 			const newLeftPaddlePos = leftPlayerRef.current.paddlePos + PADDLE_SPEED;
@@ -122,7 +127,9 @@ const usePongGame = () => {
 				leftPlayerRef.current.paddlePos = newLeftPaddlePos;
 			}
 		}
-		//leftPlayerRef.current.paddleDir = Direction.Neutral;
+		if (isKeyDown.current === Direction.Neutral) {
+			leftPlayerRef.current.paddleDir = Direction.Neutral;
+		}
 	}
 
 	const calcPong = () => {
