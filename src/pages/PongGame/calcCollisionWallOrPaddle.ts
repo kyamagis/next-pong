@@ -1,3 +1,4 @@
+import Ball from './Ball';
 import Player from './Player';
 import { BALL_DIAMETER, BALL_RADIUS } from './constant'
 import { PADDLE_HEIGHT } from './constant'
