@@ -4,6 +4,7 @@ type Ball = {
 	y: number;
 	vx: number;
 	vy: number;
+    g: number;
 }
 
 export default Ball;

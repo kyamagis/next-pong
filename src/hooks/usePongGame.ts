@@ -21,8 +21,10 @@ const initPlayerRef = () => {
 
 const usePongGame = () => {
 
+	// Next key と レンダリング
+	// Nest clacPong 周り.
 	const [lendaring, setLendaring] = useState(false);
-	const ball = useRef<Ball>(servBall());
+	const ball = useRef<Ball>(servBall(0.25));
 	const isKeyDown = useRef(Direction.Neutral);
 	const leftPlayerRef = useRef<Player>(initPlayerRef());
 	const rightPlayerRef = useRef<Player>(initPlayerRef());
@@ -30,11 +32,9 @@ const usePongGame = () => {
 	const keyUpHandler = (e: KeyboardEvent) => {
 		if(e.key === "Up" || e.key === "ArrowUp") {
 			isKeyDown.current = Direction.Neutral;
-			// leftPlayerRef.current.paddleDir = Direction.Neutral;
 		}
 		else if(e.key === "Down" || e.key === "ArrowDown") {
 			isKeyDown.current = Direction.Neutral;
-			// leftPlayerRef.current.paddleDir = Direction.Neutral;
 		}
 	}
 
@@ -60,10 +60,11 @@ const usePongGame = () => {
 
 			clearInterval(interval);
 		};
-	}, [lendaring]);
+	}, []);
 
 	const calcBallBehavior = () => {
 		const newXPos = ball.current.x + ball.current.vx;
+		ball.current.vy += ball.current.g;
 		const newYPos = ball.current.y + ball.current.vy;
 
 		if (newXPos < 0) { // ボールが左端に来たとき
@@ -74,6 +75,7 @@ const usePongGame = () => {
 		}
 		else if (newYPos <= 0 || BG_HEIGHT - BALL_DIAMETER <= newYPos) { // ボールが上下の壁に接触したとき
 			ball.current.vy *= -1;
+			ball.current.g ;
 		}
 		else {
 			ball.current.x = newXPos;
