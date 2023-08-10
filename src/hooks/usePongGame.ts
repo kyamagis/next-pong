@@ -21,7 +21,6 @@ const initPlayerRef = () => {
 
 const usePongGame = () => {
 
-	// const [ball, setBall] = useState<Ball>(servBall());
 	const [lendaring, setLendaring] = useState(false);
 	const ball = useRef<Ball>(servBall());
 	const isKeyDown = useRef(Direction.Neutral);
@@ -133,9 +132,9 @@ const usePongGame = () => {
 		calcCpuRightPlayerPos();
 		calcLeftPaddlePos();
 		if (lendaring)
-			setLendaring(false);
+			setLendaring((prevLendaring) => !prevLendaring);
 		else
-			setLendaring(true);
+			setLendaring((prevLendaring) => !prevLendaring);
 	};
 
 	return { ball, leftPlayerRef, rightPlayerRef};
