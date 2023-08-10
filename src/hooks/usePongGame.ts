@@ -25,9 +25,6 @@ const usePongGame = () => {
 	const leftPlayerRef = useRef<Player>(initPlayerRef());
 	const rightPlayerRef = useRef<Player>(initPlayerRef());
 
-	// paddle = { pos, key }; useState, useRefのハイブリッドで作れるか？
-	// 押したキーをフレームまたぐまで保持するようにする.
-
 	const keyUpHandler = (e: KeyboardEvent) => {
 		if(e.key === "Up" || e.key === "ArrowUp") {
 			leftPlayerRef.current.paddleDir = Direction.Neutral;
@@ -127,21 +124,6 @@ const usePongGame = () => {
 		}
 		//leftPlayerRef.current.paddleDir = Direction.Neutral;
 	}
-
-	// const calcLeftPaddlePos = () => {
-	// 	if(upPressedLeftPaddle) {
-	// 		setLeftPaddlePos((prevLeftPaddlePos) => (prevLeftPaddlePos - PADDLE_SPEED));
-	// 		if (leftPaddlePos <= 0){
-	// 			setLeftPaddlePos((prevLeftPaddlePos) => 0);
-	// 		}
-	// 	}
-	// 	else if(downPressedLeftPaddle) {
-	// 		setLeftPaddlePos((prevLeftPaddlePos) => (prevLeftPaddlePos + PADDLE_SPEED));
-	// 		if (BG_HEIGHT <= leftPaddlePos + PADDLE_HEIGHT) {
-	// 			setLeftPaddlePos((prevLeftPaddlePos) => (BG_HEIGHT - PADDLE_HEIGHT));
-	// 		}
-	// 	}
-	// }
 
 	const calcPong = () => {
 		calcBallBehavior();
