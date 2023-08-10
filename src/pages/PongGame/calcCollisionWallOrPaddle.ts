@@ -1,3 +1,4 @@
+import Player from './Player';
 import { BALL_DIAMETER, BALL_RADIUS } from './constant'
 import { PADDLE_HEIGHT } from './constant'
 
@@ -38,19 +39,21 @@ const gameOver = (message: string) => {
 
 type SetScore = (score: React.SetStateAction<number>) => void;
 const calcCollisionWallOrPaddle = (newYPos: number, 
-									paddlePos: number, 
-									prevBall: Ball,
-									setScore: SetScore) => {
-	if (newYPos + BALL_DIAMETER < paddlePos || paddlePos + PADDLE_HEIGHT < newYPos) {
-		setScore((prevScore: number) => {
-			const nowScore = prevScore + 1;
-			if (3 < nowScore) {
-				gameOver("Game over");
-			}
-			return nowScore;
-		});
+									prevBall: Ball, 
+									myPlayerRef: React.RefObject<Player>,
+									opponentPlayerRef: React.RefObject<Player>) => {
+	if (myPlayerRef.current === null || opponentPlayerRef.current === null) {
+		gameOver("PlayerRef.current is null");
 		return servBall();
 	}
-	return changeBallSpeedAndAngle(newYPos, prevBall, paddlePos);
+	if (newYPos + BALL_DIAMETER < myPlayerRef.current.paddlePos || myPlayerRef.current.paddlePos + PADDLE_HEIGHT < newYPos) {
+		opponentPlayerRef.current.score += 1;
+		if (3 < opponentPlayerRef.current.score) {
+			gameOver("Game over");
+		}
+		return servBall();
+	}
+	return changeBallSpeedAndAngle(newYPos, prevBall, myPlayerRef.current.paddlePos);
 }
+
 export default calcCollisionWallOrPaddle;
