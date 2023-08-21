@@ -24,7 +24,7 @@ const usePongGame = () => {
 	// Next key と レンダリング
 	// Nest clacPong 周り.
 	const [lendaring, setLendaring] = useState(false);
-	const ball = useRef<Ball>(servBall(0.25));
+	const ball = useRef<Ball>(servBall(0));
 	const isKeyDown = useRef(Direction.Neutral);
 	const leftPlayerRef = useRef<Player>(initPlayerRef());
 	const rightPlayerRef = useRef<Player>(initPlayerRef());
