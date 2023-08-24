@@ -5,13 +5,22 @@ import { BALL_DIAMETER, BALL_RADIUS } from './constant'
 import { PADDLE_HEIGHT } from './constant'
 
 import servBall from "./utils";
+import gameOver from './utils/gameOver';
+
+const setBall = (ball:  React.RefObject<Ball>, reflectedVx: number, reflectedVy: number) => {
+	if (ball.current === null) {
+		gameOver("ball.current is null");
+		return servBall(0);
+	}
+	return { x: ball.current.x, y: ball.current.y, vx: reflectedVx, vy: reflectedVy, g: ball.current.g};
+}
 
 const zeroGravity = (newYPos: number, 
 	ball:  React.RefObject<Ball>, 
 	paddlePos: number) => {
 
-	const centerOfBall = newYPos + BALL_RADIUS;
-	let directionOfBall = 1;
+	const centerOfBall: number = newYPos + BALL_RADIUS;
+	let directionOfBall: number = 1;
 
 	if (ball.current === null) {
 		gameOver("ball.current is null");
@@ -23,30 +32,29 @@ const zeroGravity = (newYPos: number,
 	}
 
 	if (centerOfBall < paddlePos + 5) {
-		return { x: ball.current.x, y: ball.current.y, vx: directionOfBall * 3, vy: -6, g: ball.current.g};
+		return setBall(ball, directionOfBall * 3, -6);
 	}
 	else if (centerOfBall < paddlePos + 30) {
-		return { x: ball.current.x, y: ball.current.y, vx: directionOfBall * 2, vy: -2, g: ball.current.g};
+		return setBall(ball, directionOfBall * 2, -2);
 	}
 	else if (centerOfBall < paddlePos + 45) {
-		return { x: ball.current.x, y: ball.current.y, vx: directionOfBall * 20, vy: 0, g: ball.current.g};
+		return setBall(ball, directionOfBall * 20, 0);
 	}
 	else if (centerOfBall <= paddlePos + 70) {
-		return { x: ball.current.x, y: ball.current.y, vx: directionOfBall * 2, vy: 2, g: ball.current.g};
+		return setBall(ball, directionOfBall * 2, 2);
 	}
 	else if (paddlePos + 70 < centerOfBall) {
-		return { x: ball.current.x, y: ball.current.y, vx: directionOfBall * 3, vy: 6, g: ball.current.g};
+		return setBall(ball, directionOfBall * 3, 6);
 	}
-	return { x: ball.current.x, y: ball.current.y, vx: directionOfBall * 10, vy: 0, g: ball.current.g};
+	return setBall(ball, directionOfBall * 10, 0);
 }
 
 const onGravity = (newYPos: number, 
 				ball:  React.RefObject<Ball>, 
 				paddlePos: number) => {
 	
-	const centerOfBall = newYPos + BALL_RADIUS;
-	let directionOfBall = 1;
-	let	coefficientOfVy = 1;
+	const centerOfBall: number = newYPos + BALL_RADIUS;
+	let directionOfBall: number = 1;
 
 	if (ball.current === null) {
 		gameOver("ball.current is null");
@@ -58,21 +66,21 @@ const onGravity = (newYPos: number,
 	}
 
 	if (centerOfBall < paddlePos + 5) {
-		return { x: ball.current.x, y: ball.current.y, vx: directionOfBall * 3, vy: -8, g: ball.current.g};
+		return setBall(ball, directionOfBall * 4, -8);
 	}
 	else if (centerOfBall < paddlePos + 30) {
-		return { x: ball.current.x, y: ball.current.y, vx: directionOfBall * 2, vy: -2, g: ball.current.g};
+		return setBall(ball, directionOfBall * 3, -6);
 	}
 	else if (centerOfBall < paddlePos + 45) {
-		return { x: ball.current.x, y: ball.current.y, vx: directionOfBall * 10, vy: -5, g: ball.current.g};
+		return setBall(ball, directionOfBall * 10, -5);
 	}
 	else if (centerOfBall <= paddlePos + 70) {
-		return { x: ball.current.x, y: ball.current.y, vx: directionOfBall * 2, vy: -4, g: ball.current.g};
+		return setBall(ball, directionOfBall * 3, -4);
 	}
 	else if (paddlePos + 70 < centerOfBall) {
-		return { x: ball.current.x, y: ball.current.y, vx: directionOfBall * 3, vy: -8, g: ball.current.g};
+		return setBall(ball, directionOfBall * 4, -8);
 	}
-	return { x: ball.current.x, y: ball.current.y, vx: directionOfBall * 10, vy: 0, g: ball.current.g};
+	return setBall(ball, directionOfBall * 10, 0);
 }
 
 const changeBallSpeedAndAngle = (newYPos: number, 
@@ -86,11 +94,6 @@ const changeBallSpeedAndAngle = (newYPos: number,
 		return zeroGravity(newYPos, ball, paddlePos);
 	}
 	return onGravity(newYPos, ball, paddlePos);
-}
-
-const gameOver = (message: string) => {
-	alert(message);
-	document.location.reload();
 }
 
 const calcCollisionWallOrPaddle = (newYPos: number, 

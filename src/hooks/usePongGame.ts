@@ -1,6 +1,6 @@
 
-import {BG_WIDTH, BG_HEIGHT, BALL_DIAMETER } from '../pages/PongGame/constant'
-import {PADDLE_HEIGHT, PADDLE_INIT_POS, PADDLE_SPEED, CPU_SPEED} from '../pages/PongGame/constant'
+import {BG_WIDTH, BG_HEIGHT, BALL_DIAMETER, BALL_RADIUS } from '../pages/PongGame/constant'
+import {PADDLE_HEIGHT, PADDLE_INIT_POS, PADDLE_SPEED, CPU_SPEED, HadoukenSpeed} from '../pages/PongGame/constant'
 
 import React, { useEffect, useRef, useState } from 'react';
 
@@ -8,6 +8,8 @@ import Ball from '../pages/PongGame/Ball'
 import servBall from '@/pages/PongGame/utils';
 import calcCollisionWallOrPaddle from '@/pages/PongGame/calcCollisionWallOrPaddle';
 import Player from '@/pages/PongGame/Player';
+import Hadouken from '@/pages/PongGame/Hadouken';
+import gameOver from '@/pages/PongGame/utils/gameOver';
 
 enum Direction {
 	Neutral = 0,
@@ -15,8 +17,24 @@ enum Direction {
 	Down = 2,
 }
 
+enum HadoukenCommand {
+	Neutral = 0,
+	DownDown = 1,
+	UpDown = 2,
+	DownRight = 3,
+	UpRight = 4,
+	DownP = 5,
+	Activated = 6
+}
+
+const GRAVITATIONAL_ACCELERATION = 0.25;
+
 const initPlayerRef = () => {
 	return { paddlePos: PADDLE_INIT_POS, paddleDir: Direction.Neutral, score: 0};
+}
+
+const initHadoukenRef = () => {
+	return { x: BALL_RADIUS, y: BG_HEIGHT / 2 , vx: 0, vy: 0, command: HadoukenCommand.Neutral};
 }
 
 const usePongGame = () => {
@@ -24,9 +42,10 @@ const usePongGame = () => {
 	// Next key と レンダリング
 	// Nest clacPong 周り.
 	const [lendaring, setLendaring] = useState(false);
-	const ball = useRef<Ball>(servBall(0));
+	const ball = useRef<Ball>(servBall(GRAVITATIONAL_ACCELERATION));
 	const isKeyDown = useRef(Direction.Neutral);
 	const leftPlayerRef = useRef<Player>(initPlayerRef());
+	const leftHadoukenRef = useRef<Hadouken>(initHadoukenRef());
 	const rightPlayerRef = useRef<Player>(initPlayerRef());
 
 	const keyUpHandler = (e: KeyboardEvent) => {
@@ -35,6 +54,30 @@ const usePongGame = () => {
 		}
 		else if(e.key === "Down" || e.key === "ArrowDown") {
 			isKeyDown.current = Direction.Neutral;
+			console.log("↓ 離す");
+			if (leftHadoukenRef.current.command === HadoukenCommand.DownP) {
+				leftHadoukenRef.current.command = HadoukenCommand.UpDown;
+				return ;
+			}
+		}
+		else if(e.key === "Right" || e.key === "ArrowRight") {
+			console.log("→ 離す");
+			if (leftHadoukenRef.current.command ===  HadoukenCommand.UpDown) {
+				leftHadoukenRef.current.command = HadoukenCommand.UpRight;
+				return ;
+			}
+		}
+		else if(e.key === 'p') {
+			console.log("p 離す");
+			if (leftHadoukenRef.current.command === HadoukenCommand.UpRight) {
+				leftHadoukenRef.current.command = HadoukenCommand.Activated;
+				leftHadoukenRef.current.vx = HadoukenSpeed;
+				return ;
+			}
+		}
+		
+		if (leftHadoukenRef.current.command !== HadoukenCommand.Activated) {
+			leftHadoukenRef.current.command = HadoukenCommand.Neutral;
 		}
 	}
 
@@ -46,6 +89,30 @@ const usePongGame = () => {
 		else if(e.key === "Down" || e.key === "ArrowDown") {
 			isKeyDown.current = Direction.Down;
 			leftPlayerRef.current.paddleDir = Direction.Down;
+			console.log("↓ 押す");
+			if (leftHadoukenRef.current.command !== HadoukenCommand.Activated) {
+				leftHadoukenRef.current.command = HadoukenCommand.DownDown;
+				return ;
+			}
+		}
+		else if(e.key === "Right" || e.key === "ArrowRight") {
+			isKeyDown.current = Direction.Neutral;
+			leftPlayerRef.current.paddleDir = Direction.Neutral;
+			console.log("→ 押す");
+			if (leftHadoukenRef.current.command ===  HadoukenCommand.DownDown) {
+				leftHadoukenRef.current.command = HadoukenCommand.DownRight;
+				return ;
+			}
+		}
+		else if(e.key === 'p') {
+			console.log("p 押す");
+			if (leftHadoukenRef.current.command === HadoukenCommand.DownRight) {
+				leftHadoukenRef.current.command = HadoukenCommand.DownP;
+				return ;
+			}
+		}
+		if (leftHadoukenRef.current.command !== HadoukenCommand.Activated) {
+			leftHadoukenRef.current.command = HadoukenCommand.Neutral;
 		}
 	};
 
@@ -63,9 +130,9 @@ const usePongGame = () => {
 	}, []);
 
 	const calcBallBehavior = () => {
-		const newXPos = ball.current.x + ball.current.vx;
+		const newXPos: number = ball.current.x + ball.current.vx;
 		ball.current.vy += ball.current.g;
-		const newYPos = ball.current.y + ball.current.vy;
+		const newYPos: number = ball.current.y + ball.current.vy;
 
 		if (newXPos < 0) { // ボールが左端に来たとき
 			ball.current = calcCollisionWallOrPaddle(newYPos, ball, leftPlayerRef, rightPlayerRef);
@@ -102,10 +169,34 @@ const usePongGame = () => {
 		}
 	}
 
+	const calcLeftHadoukenPos = () => {
+		if (leftHadoukenRef.current.command !== HadoukenCommand.Activated) {
+			leftHadoukenRef.current.y = leftPlayerRef.current.paddlePos + PADDLE_HEIGHT / 2;
+			return ;
+		}
+		leftHadoukenRef.current.x += leftHadoukenRef.current.vx;
+		if (leftHadoukenRef.current.x + BALL_RADIUS < BG_WIDTH) {
+			return ;
+		}
+
+		leftHadoukenRef.current.x = BALL_RADIUS;
+		leftHadoukenRef.current.y = leftPlayerRef.current.paddlePos + PADDLE_HEIGHT / 2;
+		leftHadoukenRef.current.vx = 0;
+		leftHadoukenRef.current.command = HadoukenCommand.Neutral;
+
+		if (rightPlayerRef.current.paddlePos <= leftHadoukenRef.current.y && 
+			leftHadoukenRef.current.y <= rightPlayerRef.current.paddlePos + PADDLE_HEIGHT) {
+			leftPlayerRef.current.score += 1;
+			if (3 < leftPlayerRef.current.score) {
+				gameOver("Game over");
+			}
+		}
+	}
+
 	const calcLeftPaddlePos = () => {
 
 		if(leftPlayerRef.current.paddleDir === Direction.Up) {
-			const newLeftPaddlePos = leftPlayerRef.current.paddlePos - PADDLE_SPEED;
+			const newLeftPaddlePos: number = leftPlayerRef.current.paddlePos - PADDLE_SPEED;
 
 			if (newLeftPaddlePos <= 0) {
 				leftPlayerRef.current.paddlePos = 0;
@@ -133,13 +224,14 @@ const usePongGame = () => {
 		calcBallBehavior();
 		calcCpuRightPlayerPos();
 		calcLeftPaddlePos();
+		calcLeftHadoukenPos();
 		if (lendaring)
 			setLendaring((prevLendaring) => !prevLendaring);
 		else
 			setLendaring((prevLendaring) => !prevLendaring);
 	};
 
-	return { ball, leftPlayerRef, rightPlayerRef};
+	return { ball, leftPlayerRef, leftHadoukenRef, rightPlayerRef};
 }
 
 export default usePongGame;

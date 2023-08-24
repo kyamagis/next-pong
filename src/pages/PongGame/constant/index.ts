@@ -13,3 +13,5 @@ export const PADDLE_INIT_POS = (BG_HEIGHT - PADDLE_HEIGHT) / 2;
 export const RIGHT_PADDLE_X_POS = BG_WIDTH - PADDLE_WIDTH;
 export const PADDLE_SPEED = 7;
 export const CPU_SPEED = 4;
+
+export const HadoukenSpeed = 5;
